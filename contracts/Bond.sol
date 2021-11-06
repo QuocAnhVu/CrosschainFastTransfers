@@ -45,15 +45,15 @@ import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 contract Bond {
     address claims;
 
+    mapping(bytes32 => bool) exists;
     mapping(bytes32 => Principal) principals;
     mapping(bytes32 => bool) settled;
-    mapping(address => uint64) nonces;
 
     constructor(address _claims) {
         claims = _claims;
     }
 
-    event Issued(uint256 value, address token, bytes32 orderHash, uint64 nonce);
+    event Issued(uint256 value, address token, bytes32 orderHash);
     event Settled(bytes32 orderHash);
 
     /**
@@ -67,6 +67,13 @@ contract Bond {
         external
         payable
     {
+        require(_order.nonce != 0, "The nonce cannot be set to 0.");
+        bytes32 orderHash = keccak256(abi.encode(_order));
+        require(
+            !exists[orderHash],
+            "An order with the same hash identity already exists."
+        );
+
         // 1) Deposit tokens into bond from borrower's account.
         bool success = IERC20(_principal.token).transferFrom(
             msg.sender,
@@ -75,21 +82,10 @@ contract Bond {
         );
 
         if (success) {
-            // 2) Overwrite the nonce in order.
-            _order.nonce = nonces[msg.sender];
-
-            // 3) Increment the nonce of the borrower.
-            nonces[msg.sender] += 1;
-
-            // 4) Store the bond in storage.
-            bytes32 orderHash = keccak256(abi.encode(_order));
+            // 2) Store the bond in storage.
+            exists[orderHash] = true;
             principals[orderHash] = _principal;
-            emit Issued(
-                _principal.value,
-                _principal.token,
-                orderHash,
-                nonces[msg.sender]
-            );
+            emit Issued(_principal.value, _principal.token, orderHash);
         }
     }
 
@@ -115,7 +111,7 @@ contract Bond {
             msg.sender == BondClaim(claims).ownerOf(uint256(_orderHash))
         ) {
             // 2) Withdraw token to claimant.
-            Principal storage principal = principals[_orderHash];
+            Principal memory principal = getPrincipal(_orderHash);
             bool success = IERC20(principal.token).transfer(
                 address(this),
                 principal.value
@@ -137,5 +133,19 @@ contract Bond {
      */
     function isSettled(bytes32 _orderHash) public view returns (bool ret) {
         return settled[_orderHash];
+    }
+
+    /**
+     * @dev Returns the principal held by a bond.
+     *
+     * @param _orderHash - A keccack256 hash of the original order struct.
+     */
+    function getPrincipal(bytes32 _orderHash)
+        public
+        view
+        returns (Principal memory ret)
+    {
+        require(exists[_orderHash], "No order with that hash identity exists.");
+        return principals[_orderHash];
     }
 }

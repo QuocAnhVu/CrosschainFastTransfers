@@ -5,5 +5,5 @@ struct Order {
     address to;
     uint256 value;
     address token; // ERC-20 token
-    uint64 nonce; // This value is optional and will be overwritten by the Bond contract.
+    bytes32 nonce; // This is a random hash supplied by the borrower
 }
