@@ -20,13 +20,17 @@ pragma solidity ^0.8.0;
  * TODO: Support Ether as loan principal.
  * TODO: Support NFTs as loan principal.
  * TODO: Support arbitrary function execution with contract address and call signature
- *       rather than order struct. Users should call issue like this:
+ *       rather than order struct. Users should call issue() like this:
  *       ```sol
         Bond(BOND_ADDR).issue(
-            10,
-            ERC20_ADDR,
-            targetContractAddr,
-            abi.encodeWithSignature("targetFunction(string)", "Hello world!")
+            Principal(10, ERC20_ADDR),
+            Order(
+                targetContractAddr,
+                abi.encodeWithSignature(
+                    "targetFunction(string)",
+                    "Hello world!"
+                )
+            )
         );
  *       ```
  */
@@ -55,21 +59,19 @@ contract Bond {
     /**
      * @dev Borrowers issue debt by depositing tokens and defining claim conditions.
      *
-     * @param _value - Amount of ERC20 tokens deposited into the bond as principal.
-     * @param _token - Address of ERC20 token contract.
+     * @param _principal - Amount and address of ERC20 tokens deposited into the bond.
      * @param _order - A struct with all the information needed for a lender to
      *                 fulfill the order and make a claim on the bond.
      */
-    function issue(
-        uint256 _value,
-        address _token,
-        Order memory _order
-    ) external payable {
+    function issue(Principal calldata _principal, Order memory _order)
+        external
+        payable
+    {
         // 1) Deposit tokens into bond from borrower's account.
-        bool success = IERC20(_token).transferFrom(
+        bool success = IERC20(_principal.token).transferFrom(
             msg.sender,
             address(this),
-            _value
+            _principal.value
         );
 
         if (success) {
@@ -81,8 +83,13 @@ contract Bond {
 
             // 4) Store the bond in storage.
             bytes32 orderHash = keccak256(abi.encode(_order));
-            principals[orderHash] = Principal(_value, _token);
-            emit Issued(_value, _token, orderHash, nonces[msg.sender]);
+            principals[orderHash] = _principal;
+            emit Issued(
+                _principal.value,
+                _principal.token,
+                orderHash,
+                nonces[msg.sender]
+            );
         }
     }
 
