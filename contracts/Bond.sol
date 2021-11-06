@@ -117,10 +117,9 @@ contract Bond {
                 principal.value
             );
             if (success) {
-                emit Settled(_orderHash);
-
                 // 3) Mark settlement of a bond.
                 settled[_orderHash] = true;
+                emit Settled(_orderHash);
             }
         }
     }
