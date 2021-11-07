@@ -1,9 +1,6 @@
 ![Star Left](./docs/star.svg)
-<img src="./docs/star.svg">
 ![UniCode](./docs/unicode.svg)
-<img src="./docs/unicode.svg">
 ![Star Right](./docs/star.svg)
-<img src="./docs/star.svg">
 
 # Crosschain Fast Transfers
 
