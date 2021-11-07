@@ -2,6 +2,8 @@
 ![UniCode](./docs/unicode.svg)
 ![Star Right](./docs/star.svg)
 
+This repo is a submission to Uniswap's UniCode 2021 Hackathon.
+
 # Crosschain Fast Transfers
 
 ## Web3 is full of barriers
@@ -29,8 +31,6 @@ We want our transactions to be publicly verifiable, but there are many reasons t
 Zero-knowledge proofs allow us to prove things without knowing what they are. This repository uses the [AZTEC Protocol](https://aztec.network/). With AZTEC, the bonds that are created can keep their balance hidden while ensuring transactions are valid. Not even the contracts that facilitates this will know how much money is going where - only that the sheets are balanced. At the same time, borrowers can dole "viewing keys" to lenders which grant them special access to see the contents of the account. Lenders can make strong verifications. And when it comes time to move data across blockchain boundaries, zero-knowledge proofs allow us to roll up transactions. This means users of the network can pay a fraction of the gas fees as a direct, public transaction.
 
 ----------------------------------------------------------------------------------------
-
-This repo is a submission the Uniswaps UniCode 2021 Hackathon.
 
 `contracts/` contains the bond contracts.
 
