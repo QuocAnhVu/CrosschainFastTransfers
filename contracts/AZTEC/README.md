@@ -1,1 +1,0 @@
-This directory was forked without modification from https://github.com/AztecProtocol/AZTEC/tree/8f65f149ccba347d6e9d570089b3d40381f4670e/packages/protocol/contracts
