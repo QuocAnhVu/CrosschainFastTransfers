@@ -7,7 +7,7 @@ import Web3 from "web3";
 import { Bond, BondClaim, ERC20Mintable } from "../typechain";
 import chalk from "chalk";
 
-describe("Bond", function () {
+describe("Generic Bond", function () {
   let bonds: Bond;
   let claims: BondClaim;
   let tokens: ERC20Mintable;
@@ -17,6 +17,7 @@ describe("Bond", function () {
   let charlie;
 
   beforeEach(async function () {
+    // Deploy contracts.
     const Bond = await ethers.getContractFactory("Bond");
     const BondClaim = await ethers.getContractFactory("BondClaim");
     const Token = await ethers.getContractFactory("ERC20Mintable");
@@ -31,6 +32,7 @@ describe("Bond", function () {
     await bonds.deployed();
     await tokens.deployed();
 
+    // Log addresses and setup listeners to log events.
     let names = {};
     names[alice.address] = chalk.red("Alice");
     names[bob.address] = chalk.blue("Bob");
@@ -81,15 +83,12 @@ describe("Bond", function () {
     });
   });
 
-  it("Should deploy successfully", async function () {
-    expect(bonds.address).is.not.empty;
-    expect(claims.address).is.not.empty;
-  });
-
   it("Should complete full transaction successfully", async function () {
+    // 1) Mint tokens to Alice and Bob.
     await tokens.mint(alice.address, 1000);
     await tokens.mint(bob.address, 99);
 
+    // 2) Alice creates a bond. Alice wants to send $99 to Charlie. Alice will pay $100.
     const principal: Principal = { value: 100, token: tokens.address };
     const order: Order = {
       to: charlie.address,
@@ -106,10 +105,12 @@ describe("Bond", function () {
     });
     const orderHash = await issuedEvent;
 
+    // 3) Bob creates a bond claim. Bob sends $99 to Charlie.
     await tokens.connect(bob).approve(claims.address, 99);
     await claims.connect(bob).claim(order);
     expect(await claims.ownerOf(orderHash)).to.equal(bob.address);
 
+    // 4) Later, Bob settles the bond. Bob receives $100 from the bond.
     await bonds.connect(bob).settle(orderHash);
     expect(await bonds.isSettled(orderHash));
     await new Promise<void>((resolve) => {
@@ -120,6 +121,7 @@ describe("Bond", function () {
       });
     });
 
+    // 5) Ensure that everybody gets what they expect.
     expect(await tokens.balanceOf(alice.address)).to.equal(900);
     expect(await tokens.balanceOf(bob.address)).to.equal(100);
     expect(await tokens.balanceOf(charlie.address)).to.equal(99);

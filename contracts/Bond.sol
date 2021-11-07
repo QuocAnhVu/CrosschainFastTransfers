@@ -26,9 +26,9 @@ pragma experimental ABIEncoderV2;
         Bond(BOND_ADDR).issue(
             Principal(10, ERC20_ADDR),
             Order(
-                targetContractAddr,
+                fooAddr,
                 abi.encodeWithSignature(
-                    "targetFunction(string)",
+                    "barFunction(string)",
                     "Hello world!"
                 )
             )
@@ -54,14 +54,14 @@ contract Bond {
         bytes32 nonce; // This is a random hash supplied by the borrower
     }
 
-    address claims;
+    BondClaim public claims;
 
     mapping(bytes32 => bool) exists;
     mapping(bytes32 => Principal) principals;
     mapping(bytes32 => bool) settled;
 
-    constructor(address _claims) public {
-        claims = _claims;
+    constructor(address _claimsAddr) public {
+        claims = BondClaim(_claimsAddr);
     }
 
     event Issued(uint256 value, address token, bytes32 orderHash);
@@ -77,7 +77,6 @@ contract Bond {
     function issue(Principal memory _principal, Order memory _order)
         public
         payable
-        returns (bytes32 orderHash)
     {
         require(_order.nonce != 0, "The nonce cannot be set to 0.");
         bytes32 orderHash = keccak256(abi.encode(_order));
@@ -92,13 +91,12 @@ contract Bond {
             address(this),
             _principal.value
         );
+        require(success);
 
-        if (success) {
-            // 2) Store the bond in storage.
-            exists[orderHash] = true;
-            principals[orderHash] = _principal;
-            emit Issued(_principal.value, _principal.token, orderHash);
-        }
+        // 2) Store the bond in storage.
+        exists[orderHash] = true;
+        principals[orderHash] = _principal;
+        emit Issued(_principal.value, _principal.token, orderHash);
     }
 
     /**
@@ -119,8 +117,8 @@ contract Bond {
 
         // 1) Verify claimant rights.
         if (
-            BondClaim(claims).isClaimed(_orderHash) &&
-            msg.sender == BondClaim(claims).ownerOf(uint256(_orderHash))
+            claims.isClaimed(_orderHash) &&
+            msg.sender == claims.ownerOf(uint256(_orderHash))
         ) {
             // 2) Withdraw token to claimant.
             Principal memory principal = getPrincipal(_orderHash);
