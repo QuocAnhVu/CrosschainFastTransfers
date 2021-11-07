@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-pragma solidity ^0.8.0;
+pragma solidity ^0.5.0;
+pragma experimental ABIEncoderV2;
 
 /**
  * @title Bond
@@ -35,21 +36,31 @@ pragma solidity ^0.8.0;
  *       ```
  */
 
-import "./lib/Order.sol";
-import "./lib/Principal.sol";
 import "./BondClaim.sol";
 
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
+import "openzeppelin-solidity/contracts/token/ERC721/IERC721.sol";
 
 contract Bond {
+    struct Principal {
+        uint256 value;
+        address token; // ERC-20 token
+    }
+
+    struct Order {
+        address to;
+        uint256 value;
+        address token; // ERC-20 token
+        bytes32 nonce; // This is a random hash supplied by the borrower
+    }
+
     address claims;
 
     mapping(bytes32 => bool) exists;
     mapping(bytes32 => Principal) principals;
     mapping(bytes32 => bool) settled;
 
-    constructor(address _claims) {
+    constructor(address _claims) public {
         claims = _claims;
     }
 
@@ -63,8 +74,8 @@ contract Bond {
      * @param _order - A struct with all the information needed for a lender to
      *                 fulfill the order and make a claim on the bond.
      */
-    function issue(Principal calldata _principal, Order memory _order)
-        external
+    function issue(Principal memory _principal, Order memory _order)
+        public
         payable
     {
         require(_order.nonce != 0, "The nonce cannot be set to 0.");
@@ -99,7 +110,7 @@ contract Bond {
      * @param _orderHash - A keccack256 hash of the original order struct which is also the
      *                     tokenId of the claim NFT.
      */
-    function settle(bytes32 _orderHash) external {
+    function settle(bytes32 _orderHash) public {
         require(
             !isSettled(_orderHash),
             "The bond has already been settled and the account has been withdrawn from."

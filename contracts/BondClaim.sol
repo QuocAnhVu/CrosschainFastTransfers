@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-pragma solidity ^0.8.0;
+pragma solidity ^0.5.0;
+pragma experimental ABIEncoderV2;
 
 /**
  * @title BondClaim
@@ -18,15 +19,20 @@ pragma solidity ^0.8.0;
  * fulfilled by another lender.
  */
 
-import "./lib/Order.sol";
-
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
+import "openzeppelin-solidity/contracts/token/ERC721/ERC721.sol";
 
 contract BondClaim is ERC721 {
+    struct Order {
+        address to;
+        uint256 value;
+        address token; // ERC-20 token
+        bytes32 nonce; // This is a random hash supplied by the borrower
+    }
+
     mapping(bytes32 => bool) claimed;
 
-    constructor() ERC721("Bond", "BOND") {}
+    constructor() public ERC721() {}
 
     event Claimed(bytes32 orderHash);
 
@@ -44,7 +50,7 @@ contract BondClaim is ERC721 {
      * @param _order - A struct with all the information needed for this contract to
      *                 forward the call to another function.
      */
-    function claim(Order calldata _order) external {
+    function claim(Order memory _order) public {
         bytes32 orderHash = keccak256(abi.encode(_order));
         require(
             !isClaimed(orderHash),
