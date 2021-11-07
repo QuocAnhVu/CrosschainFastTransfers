@@ -35,8 +35,10 @@
   },
   "dependencies": {
     "@aztec/protocol": "^1.7.1",
+    "chalk": "^4.1.2",
     "elliptic-curve-solidity": "witnet/elliptic-curve-solidity",
-    "openzeppelin-solidity": "^2.4.0"
+    "openzeppelin-solidity": "^2.4.0",
+    "web3": "^1.6.0"
   },
   "license": "GPL-3.0-or-later"
 }

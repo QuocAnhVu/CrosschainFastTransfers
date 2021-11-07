@@ -77,6 +77,7 @@ contract Bond {
     function issue(Principal memory _principal, Order memory _order)
         public
         payable
+        returns (bytes32 orderHash)
     {
         require(_order.nonce != 0, "The nonce cannot be set to 0.");
         bytes32 orderHash = keccak256(abi.encode(_order));
@@ -124,7 +125,7 @@ contract Bond {
             // 2) Withdraw token to claimant.
             Principal memory principal = getPrincipal(_orderHash);
             bool success = IERC20(principal.token).transfer(
-                address(this),
+                msg.sender,
                 principal.value
             );
             if (success) {
