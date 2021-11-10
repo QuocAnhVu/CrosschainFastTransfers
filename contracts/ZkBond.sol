@@ -1,11 +1,11 @@
-// SPDX-License-Identifier: GPL-3.0-or-later
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.5.0;
 pragma experimental ABIEncoderV2;
 
 /**
  * @title ZkBond
  * @author Quoc-Anh Vu
- * @dev An implementation of zero-knowledge conditional bonds. See "./Bond.sol" for info
+ * @dev An extension of the generic bond contract using zero-knowledge proofs. See "./Bond.sol" for info
  * about generic conditional bonds.
  *
  * The generic version has been modified so that no one but the borrow and lender can know
