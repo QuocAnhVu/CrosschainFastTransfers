@@ -4,6 +4,8 @@
 
 This repo is a submission to Uniswap's UniCode 2021 Hackathon.
 
+[Looking for the Metamask fork? Click here!](https://github.com/Sednaoui/metamask-fork)
+
 # Crosschain Fast Transfers
 
 ## Web3 is full of barriers
@@ -28,7 +30,7 @@ This is the simple, general protocol. In this repository, I have also demonstrat
 
 We want our transactions to be publicly verifiable, but there are many reasons to hide their content. For example, traders who must publicly declare their trades are vulnerable to front-running and other price manipulations. 
 
-Zero-knowledge proofs allow us to prove things without knowing what they are. This repository uses the [AZTEC Protocol](https://aztec.network/). With AZTEC, the bonds that are created can keep their balance hidden while ensuring transactions are valid. Not even the contracts that facilitates this will know how much money is going where - only that the sheets are balanced. 
+Zero-knowledge proofs allow us to prove things without knowing what they are. This repository uses the [AZTEC Protocol](https://aztec.network/). With AZTEC, the bonds that are created can keep their balance hidden while ensuring transactions are valid. Not even the contracts that facilitate this will know how much money is going where - only that the sheets are balanced. 
 
 At the same time, borrowers can grant "viewing keys" to lenders which grant them special access to see the contents of the account. Lenders can make strong verifications. 
 
